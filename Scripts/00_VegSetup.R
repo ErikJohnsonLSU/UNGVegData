@@ -2,8 +2,6 @@ setwd("~/Research/Urban Native Greens/Data/UNGVegData/")
 
 rm(list = ls()) # clear the Environment
 
-# new script
-
 # Load the data ----------------------------------------------------------------
 
 library(RODBC)
