@@ -1,5 +1,5 @@
 setwd("~/Research/Urban Native Greens/Data/UNGVegData/") # For Erik
-setwd("") # Fix this for Alex
+setwd("C:/Users/alexb/Desktop/R Projects/UNG/Urban_Native_Greens/UNGVegData") # Fix this for Alex
 
 rm(list = ls()) # clear the Environment
 
@@ -9,9 +9,16 @@ library(RODBC)
 
 # To connect to Access driver, it seems the full directory path is needed
 
+# Only Erik
 con <- odbcDriverConnect(
   "Driver={Microsoft Access Driver (*.mdb, *.accdb)};
    DBQ=C:/Users/ErikJohnson/OneDrive - LSU AgCenter/Documents/Research/Urban Native Greens/Data/UNGVegData/Data/UNG Veg Surveys.accdb"
+)
+
+#Only Alex
+con <- odbcDriverConnect(
+  "Driver={Microsoft Access Driver (*.mdb, *.accdb)};
+   DBQ=C:/Users/alexb/Desktop/R Projects/UNG/Urban_Native_Greens/UNGVegData/Data/UNG Veg Surveys.accdb"
 )
 
 box <- sqlFetch(con, "Survey-Box") #read table from Access database file
@@ -35,12 +42,6 @@ herb_wide <- herb %>%
     values_fill = 0
   )
 
-# Diagnostic to look for duplicate species in a subplot
-herb %>%
-  count(SubplotSurveyID, SpeciesID) %>%
-  filter(n > 1)
-
-
 sapshrub_wide <- sapshrub %>%
   select(SubplotSurveyID, SpeciesID, PctCover) %>%
   pivot_wider(
@@ -48,11 +49,6 @@ sapshrub_wide <- sapshrub %>%
     values_from = PctCover,
     values_fill = 0
   )
-
-# Diagnostic to look for duplicate species in a subplot
-sapshrub %>%
-  count(SubplotSurveyID, SpeciesID) %>%
-  filter(n > 1)
 
 # Summarize tree data to wide format -------------------------------------------
 
