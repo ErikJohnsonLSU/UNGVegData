@@ -1,4 +1,5 @@
-setwd("~/Research/Urban Native Greens/Data/UNGVegData/")
+setwd("~/Research/Urban Native Greens/Data/UNGVegData/") # For Erik
+setwd("") # Fix this for Alex
 
 rm(list = ls()) # clear the Environment
 
@@ -10,7 +11,7 @@ library(RODBC)
 
 con <- odbcDriverConnect(
   "Driver={Microsoft Access Driver (*.mdb, *.accdb)};
-   DBQ=C:/Users/ErikJohnson/OneDrive - LSU AgCenter/Documents/Research/Urban Native Greens/Data/UNGVegData/Data/UNGVegSurveys.accdb"
+   DBQ=C:/Users/ErikJohnson/OneDrive - LSU AgCenter/Documents/Research/Urban Native Greens/Data/UNGVegData/Data/UNG Veg Surveys.accdb"
 )
 
 box <- sqlFetch(con, "Survey-Box") #read table from Access database file
