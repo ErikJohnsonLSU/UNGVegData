@@ -78,11 +78,14 @@ tree_wide <- tree_summary %>%
 a <- box %>%
   left_join(canopy, by = "SurveyID")
 
-veg <- a %>%
-  left_join(herb_wide, by = "SubplotSurveyID") 
-  left_join(sapshrub_wide, by = "SubplotSurveyID") 
+head(herb_wide)
+head(sapshrub_wide)
+head(tree_wide)
 
-herbs <- SurveyHerbaceous %>%
-  left_join(SurveySubplot, by = "SubplotSurveyID") %>%
-  left_join(SurveyBox, by = "SurveyID") %>%
-  mutate(Stratum = "Herbaceous")
+veg <- a %>%
+  left_join(herb_wide, by = "SubplotSurveyID") %>%
+  left_join(sapshrub_wide, by = "SubplotSurveyID") %>%
+  left_join(tree_wide, by = "SubplotSurveyID")
+
+write.csv(veg, "Outputs/UNGveg2026.csv")
+
