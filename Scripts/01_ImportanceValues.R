@@ -1,6 +1,7 @@
 # Importance values
 
 setwd("~/Research/Urban Native Greens/Data/UNGVegData/") # For Erik
+setwd("C:/Users/alexb/Desktop/R Projects/UNG/Urban_Native_Greens") #For Alex
 
 library(RODBC)
 
@@ -11,6 +12,10 @@ con <- odbcDriverConnect(
   "Driver={Microsoft Access Driver (*.mdb, *.accdb)};
    DBQ=C:/Users/ErikJohnson/OneDrive - LSU AgCenter/Documents/Research/Urban Native Greens/Data/UNGVegData/Data/UNG Veg Surveys.accdb"
 )
+#For A-Dawg
+con <- odbcDriverConnect(
+  "Driver={Microsoft Access Driver (*.mdb, *.accdb)};
+   DBQ=C:/Users/alexb/LSU AgCenter/Johnson, Erik I. - Urban Native Greens/Data/UNG Veg Surveys.accdb")
 
 box <- sqlFetch(con, "Survey-Box") #read table from Access database file
 herb <- sqlFetch(con, "Survey-Herbaceous") 
@@ -30,7 +35,7 @@ herb_wide <- herb %>%
   pivot_wider(
     names_from = SpeciesID,
     values_from = PctCover,
-    values_fill = 0
+    values_fill = list(PctCover = 0)
   )
 
 herb_long <- herb_wide %>%
@@ -71,9 +76,21 @@ total_freq <- freq %>%
   )
 
 # Step 3 - Relative cover for each species / sum of covers among species
-
-
+rel_cover <- freq %>%
+  left_join(total_freq, by = "BoxID") %>%
+  mutate(
+    rel_cover = (herb_cover_mean / mean_cover_total) * 100
+  )
 
 # Step 4 - IV = sum of relative values for each species within each plot
+rel_metrics <- freq %>%
+  left_join(total_freq, by = "BoxID") %>%
+  mutate(
+    rel_freq = (herb_cover_sum / herb_freq_total) * 100,
+    rel_cover = (herb_cover_mean / mean_cover_total) * 100,
+    IV = (rel_freq + rel_cover) / 2
+  )
+#IV out of 100? to make easier to comprehend?
+#Will have to divide by 3 for other shrubs species but ration should stay the same
 
 
