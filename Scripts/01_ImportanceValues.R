@@ -93,4 +93,6 @@ rel_metrics <- freq %>%
 #IV out of 100? to make easier to comprehend?
 #Will have to divide by 3 for other shrubs species but ration should stay the same
 
+#Shrubs IV
+
 
