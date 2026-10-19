@@ -2,6 +2,7 @@ setwd("~/Research/Urban Native Greens/Data/UNGVegData/") # For Erik
 setwd("C:/Users/alexb/Desktop/R Projects/UNG/Urban_Native_Greens/UNGVegData") # Fix this for Alex
 
 rm(list = ls()) # clear the Environment
+rm(box) # clears a single object
 
 # Load the data ----------------------------------------------------------------
 
