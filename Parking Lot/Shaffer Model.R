@@ -16,7 +16,7 @@ con <- odbcDriverConnect(
 )
 
 library(readxl)
-NestFates_2026 <- read_excel("UNGVegData/Data/NestFates_2026.xlsx")
+NestFates_2026 <- read_excel("C:/Users/alexb/Desktop/R Projects/UNG/Urban_Native_Greens/UNGVegData/Data/NestFates_2026.xlsx")
 View(NestFates_2026)
 
 box <- sqlFetch(con, "Survey-Box") #read table from Access database file
@@ -200,7 +200,6 @@ tree_IV %>%
 
 #####Basal Area------------------------------------------------------------------
 
-library(dplyr)
 
 
 tree2 <- tree %>%
@@ -223,25 +222,73 @@ plot_BA <- subplot_BA %>%
     .groups = "drop"
   )
 
-plot_cover <- box3 %>%
+#####canopy -------------
+plot_canopy_cover <- box3 %>%
   group_by(BoxID) %>%
   summarise(
     avg_canopy_cover = mean(Canopy_cover, na.rm = TRUE),
     .groups = "drop"
   )
-plot_metrics <- plot_BA %>%
+
+plot_canopy_ba_metrics <- plot_BA %>%
   left_join(plot_cover, by = "BoxID")
 
-#####canopy -------------
-plot_Canopy_cover <- box3 %>%
-  group_by(BoxID) %>%
-  summarise(
-    avg_canopy_cover = mean(Canopy_cover, na.rm = TRUE),
-    .groups = "drop"
+
+
+
+######Data Frame--------------------------------------------------------------------------------------
+# Clean up and isolate the values for everything
+# Clean and widen IV
+
+
+#Major road block
+herb_wide_final <- herb_IV %>%
+  ungroup() %>%                          
+  dplyr::select(BoxID, SpeciesID, PctCover) %>% 
+  pivot_wider(
+    names_from = SpeciesID,
+    values_from = IV,
+    names_prefix = "IV_herb_",
+    values_fill = 0
   )
 
 
-#####Shaffer Framework -------------------------------------------------
+shrub_wide_final <- shrub_IV %>%
+  ungroup() %>%
+  dplyr::select(BoxID, SpeciesID, ??????????? ) %>%
+  pivot_wider(
+    names_from = SpeciesID,
+    values_from = IV_shrub,
+    names_prefix = "IV_shrub_",
+    values_fill = 0
+  )
+
+# Tree IV Fix
+tree_wide_final <- tree_IV %>%
+  ungroup() %>%
+  dplyr::select(BoxID, SpeciesID,???????????) %>%
+  pivot_wider(
+    names_from = SpeciesID,
+    values_from = IV,
+    names_prefix = "IV_tree_",
+    values_fill = 0
+  )
+
+#combines and isolates BA and CC
+plot_physical_metrics <- plot_metrics %>%
+  select(BoxID, avg_BA_m2, avg_canopy_cover)
+
+#Joins everything
+The_One_Data_Frame_To_Rule_Them_All <- NestFates_2026 %>%
+  left_join(plot_physical_metrics, by = "BoxID") %>%
+  left_join(herb_wide_final, by = "BoxID") %>%
+  left_join(shrub_wide_final, by = "BoxID") %>%
+  left_join(tree_wide_final, by = "BoxID")
+
+# Check the results
+glimpse(master_df)
+
+#####Shaffer Framework -------------------------------------------------------------
 #no canopy cover in yet
 library(lme4)
 
@@ -324,6 +371,7 @@ shaffer.baherb <- glm(
   weights = ExposureDays,
   data = "input"
 )  
+
 #Shaffer shrubba
 shaffer.shrubba <- glm(
   Fate ~ shrub_IV +
@@ -332,6 +380,7 @@ shaffer.shrubba <- glm(
   weights = ExposureDays,
   data = "input here"
 )
+
 nest_intervals$DSR <- predict(
   shaffer.mod,
   type = "response"
@@ -350,15 +399,11 @@ brood <- glm.nb(
     shrub_IV +
     herb_IV +
     plot_ba,
-  data = "nest_success_data"[nest_data$Fledglings > 0,]
+  data = "NestFates_2026"[nest_data$Fledglings > 0,]
 )
 
 nest_success_data$ExpectedFecundity <-
   nest_success_data$NestSuccess *
   predict(brood,
           type = "response")
-
-
-
-
 
