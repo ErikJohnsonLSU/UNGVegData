@@ -16,6 +16,7 @@ con <- odbcDriverConnect(
 )
 
 library(readxl)
+#NestFates_2026 <- read_excel("Data/NestFates_2026.xlsx") #Erik
 NestFates_2026 <- read_excel("C:/Users/alexb/Desktop/R Projects/UNG/Urban_Native_Greens/UNGVegData/Data/NestFates_2026.xlsx")
 View(NestFates_2026)
 
