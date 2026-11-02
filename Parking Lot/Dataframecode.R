@@ -1,3 +1,4 @@
+
 setwd("~/Research/Urban Native Greens/Data/UNGVegData/") # For Erik
 setwd("C:/Users/alexb/Desktop/R Projects/UNG/Urban_Native_Greens") #For Alex
 library(RODBC)
@@ -16,6 +17,7 @@ con <- odbcDriverConnect(
 )
 
 library(readxl)
+#NestFates_2026 <- read_excel("Data/NestFates_2026.xlsx") #Erik
 NestFates_2026 <- read_excel("C:/Users/alexb/Desktop/R Projects/UNG/Urban_Native_Greens/UNGVegData/Data/NestFates_2026.xlsx")
 View(NestFates_2026)
 
@@ -326,6 +328,71 @@ shrub_invasive_cover <- sapshrub %>%
     shrub_invasive_cover = mean(subplot_invasive_cover, na.rm = TRUE),
     .groups = "drop"
   )
+subplot_BA <- tree2 %>%
+  group_by(BoxID, SubplotSurveyID) %>%
+  summarise(
+    BA_subplot = sum(BA_m2, na.rm = TRUE),
+    .groups = "drop"
+  )
+plot_BA <- subplot_BA %>%
+  group_by(BoxID) %>%
+  summarise(
+    avg_BA_m2 = mean(BA_subplot, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+
+#Invasive ba per box 
+invasive_subplot_BA <- tree2 %>%
+  group_by(BoxID, SubplotSurveyID) %>%
+  filter(Invasive == 1) %>%
+  summarise(
+    invasive_BA_subplot = sum(BA_m2, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+invasive_plot_BA <- invasive_subplot_BA %>%
+  group_by(BoxID) %>%
+  summarise(
+    avg_BA_m2 = mean(invasive_BA_subplot, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+#Native Cover
+
+herb_native_cover <- herb %>%
+  left_join(
+    box3 %>% select(BoxID, SubplotSurveyID),
+    by = "SubplotSurveyID"
+  ) %>%
+  filter(Invasive == 0) %>%
+  group_by(BoxID, SubplotSurveyID) %>%
+  summarise(
+    subplot_native_cover = sum(PctCover, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  group_by(BoxID) %>%
+  summarise(
+    herb_native_cover = mean(subplot_native_cover, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+shrub_native_cover <- sapshrub %>%
+  left_join(
+    box3 %>% select(BoxID, SubplotSurveyID),
+    by = "SubplotSurveyID"
+  ) %>%
+  filter(Invasive == 0) %>%
+  group_by(BoxID, SubplotSurveyID) %>%
+  summarise(
+    subplot_native_cover = sum(PctCover, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  group_by(BoxID) %>%
+  summarise(
+    shrub_native_cover = mean(subplot_native_cover, na.rm = TRUE),
+    .groups = "drop"
+  )
 
 veg_metrics <- plot_canopy_ba_metrics %>%
   left_join(top10_tree, by = "BoxID") %>%
@@ -335,12 +402,14 @@ veg_metrics <- plot_canopy_ba_metrics %>%
   left_join(herb_cover, by = "BoxID") %>%
   left_join(herb_invasive_cover, by = "BoxID") %>%
   left_join(shrub_invasive_cover, by = "BoxID") %>%
-  left_join(avg_tree_ba, by = "BoxID")
-  
+  left_join(avg_tree_ba, by = "BoxID") %>%
+  left_join(invasive_plot_BA, by = "BoxID")%>%
+  left_join(herb_native_cover, by = "BoxID")%>%
+  left_join(shrub_native_cover, by = "BoxID")
 
-
+1
 NestFates_2026 <- NestFates_2026 %>%
-  rename(BoxID = "Station Name")
+  rename(BoxID = `Station Name`)
 
 #to sort data that doesn't have data in the other 
 anti_join(NestFates_2026, veg_metrics, by = "BoxID")#missing from veg
@@ -357,8 +426,23 @@ nrow(shaffer_data_filtered)
 
 
 
+#####Data Frame PROW ----------------------------------------------------------
 
 
+anti_join(NestFates_2026, veg_metrics, by = "BoxID")#missing from veg
+anti_join(veg_metrics, NestFates_2026, by = "BoxID")#missing from nest data
 
+shaffer_data_PROW <- NestFates_2026 %>%
+  inner_join(veg_metrics, by = "BoxID") %>% 
+  filter(Species == "PROW", avg_canopy_cover != "NaN")
 
+shaffer_data_PROW
+
+#####Data Frame CARW---------------------------------------------------------------
+
+shaffer_data_CARW <- NestFates_2026 %>%
+  inner_join(veg_metrics, by = "BoxID") %>% 
+  filter(Species == "CARW", avg_canopy_cover != "NaN")
+
+shaffer_data_CARW
 
